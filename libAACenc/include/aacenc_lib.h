@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+ï¿½ Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Fï¿½rderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -865,6 +865,7 @@ typedef enum
 
   AACENC_GRANULE_LENGTH           = 0x0105,  /*!< Core encoder (AAC) audio frame length in samples:
                                                   - 1024: Default configuration.
+                                                  - 960: DRM/DAB+.
                                                   - 512: Default LD/ELD configuration.
                                                   - 480: Optional length in LD/ELD configuration. */
 

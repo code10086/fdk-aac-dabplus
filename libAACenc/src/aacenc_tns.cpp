@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+ï¿½ Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Fï¿½rderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -186,6 +186,17 @@ static const TNS_MAX_TAB_ENTRY tnsMaxBandsTab1024[] =
   { 8000,  { 39, 14}}
 };
 
+static const TNS_MAX_TAB_ENTRY tnsMaxBandsTab960[] =
+{
+  { 48000, { 49, 14}},
+  { 44100, { 49, 14}},
+  { 32000, { 49, 14}},
+  { 24000, { 46, 15}},
+  { 22050, { 46, 15}},
+  { 16000, { 42, 15}},
+  { 8000,  { 40, 15}}
+};
+
 static const TNS_MAX_TAB_ENTRY tnsMaxBandsTab480[] =
 {
   { 48000, { 31, -1}},
@@ -282,6 +293,9 @@ static INT getTnsMaxBands(
 
   switch (granuleLength) {
     case 960:
+      pMaxBandsTab = tnsMaxBandsTab960;
+      maxBandsTabSize = sizeof(tnsMaxBandsTab960)/sizeof(TNS_MAX_TAB_ENTRY);
+      break;
     case 1024:
       pMaxBandsTab = tnsMaxBandsTab1024;
       maxBandsTabSize = sizeof(tnsMaxBandsTab1024)/sizeof(TNS_MAX_TAB_ENTRY);

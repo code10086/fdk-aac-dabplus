@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+ï¿½ Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Fï¿½rderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -277,13 +277,16 @@ void FDKaacEnc_MapConfig(CODER_CONFIG *cc, USER_PARAM *extCfg, HANDLE_AACENC_CON
   /* Map virtual aot to transport aot. */
   switch (hAacConfig->audioObjectType) {
     case AOT_MP2_AAC_LC:
+    case AOT_DABPLUS_AAC_LC:
       transport_AOT = AOT_AAC_LC;
       break;
     case AOT_MP2_SBR:
+    case AOT_DABPLUS_SBR:
       transport_AOT = AOT_SBR;
       cc->flags |= CC_SBR;
      break;
     case AOT_MP2_PS:
+    case AOT_DABPLUS_PS:
       transport_AOT = AOT_PS;
       cc->flags |= CC_SBR;
       break;
@@ -589,7 +592,7 @@ INT aacEncoder_LimitBitrate(
  *
  * \hAacEncoder Internal encoder config which is to be updated
  * \param config User provided config (public struct)
- * \return ´returns always AAC_ENC_OK
+ * \return ï¿½returns always AAC_ENC_OK
  */
 static
 AACENC_ERROR FDKaacEnc_AdjustEncSettings(HANDLE_AACENCODER hAacEncoder,
@@ -633,6 +636,16 @@ AACENC_ERROR FDKaacEnc_AdjustEncSettings(HANDLE_AACENCODER hAacEncoder,
           config->userTpType = (config->userTpType!=TT_UNKNOWN) ? config->userTpType : TT_MP4_ADTS;
           hAacConfig->framelength = (config->userFramelength!=(UINT)-1) ? config->userFramelength : 1024;
           if (hAacConfig->framelength != 1024 && hAacConfig->framelength != 960) {
+            return AACENC_INVALID_CONFIG;
+          }
+          break;
+      case AOT_DABPLUS_SBR:
+      case AOT_DABPLUS_PS:
+    	  hAacConfig->syntaxFlags |= ((config->userSbrEnabled)    ? AC_SBR_PRESENT : 0);
+      case AOT_DABPLUS_AAC_LC:
+          config->userTpType = (config->userTpType!=TT_UNKNOWN) ? config->userTpType : TT_MP4_RAW;
+          hAacConfig->framelength = (config->userFramelength!=(UINT)-1) ? config->userFramelength : 960;
+          if (hAacConfig->framelength != 960) {
             return AACENC_INVALID_CONFIG;
           }
           break;
@@ -1528,6 +1541,7 @@ AACENC_ERROR aacEncGetLibInfo(LIB_INFO *info)
   /* Capability flags */
   info[i].flags = 0
     | CAPF_AAC_1024 | CAPF_AAC_LC
+    | CAPF_AAC_960
     | CAPF_AAC_512
     | CAPF_AAC_480
     | CAPF_AAC_DRC
@@ -1560,18 +1574,22 @@ AACENC_ERROR aacEncoder_SetParam(
             /* check if AOT matches the allocated modules */
             switch ( value ) {
               case AOT_PS:
+              case AOT_DRM_SBR: // Added mfeilen
+              case AOT_DABPLUS_PS:
               case AOT_MP2_PS:
                 if (!(hAacEncoder->encoder_modis & (ENC_MODE_FLAG_PS))) {
                   err = AACENC_INVALID_CONFIG;
                   goto bail;
                 }
               case AOT_SBR:
+              case AOT_DABPLUS_SBR:
               case AOT_MP2_SBR:
                 if (!(hAacEncoder->encoder_modis & (ENC_MODE_FLAG_SBR))) {
                   err = AACENC_INVALID_CONFIG;
                   goto bail;
                 }
               case AOT_AAC_LC:
+              case AOT_DABPLUS_AAC_LC:
               case AOT_MP2_AAC_LC:
               case AOT_ER_AAC_LC:
               case AOT_ER_AAC_LD:
@@ -1680,6 +1698,7 @@ AACENC_ERROR aacEncoder_SetParam(
         if (settings->userFramelength != value) {
           switch (value) {
             case 1024:
+            case 960:
             case 512:
             case 480:
               settings->userFramelength = value;
