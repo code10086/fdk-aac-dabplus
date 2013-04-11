@@ -26,9 +26,10 @@
 							</tool>
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.autogen.890164199" name="autogen.sh" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.autogen"/>
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc.1798250083" name="GCC C Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc">
-								<option id="gnu.c.compiler.option.include.paths.72462760" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.c.compiler.option.include.paths.72462760" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/fdk-aac-dabplus/libAACenc/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/fdk-aac-dabplus/libAACenc/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/fdk-aac-dabplus/libSYS/include}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2123877211" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

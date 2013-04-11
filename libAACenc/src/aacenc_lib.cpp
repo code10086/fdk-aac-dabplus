@@ -87,7 +87,7 @@ amm-info@iis.fraunhofer.de
   contents/description: FDK HE-AAC Encoder interface library functions
 
 ****************************************************************************/
-
+#include <stdio.h>
 #include "aacenc_lib.h"
 #include "FDK_audio.h"
 #include "aacenc.h"
@@ -276,17 +276,17 @@ void FDKaacEnc_MapConfig(CODER_CONFIG *cc, USER_PARAM *extCfg, HANDLE_AACENC_CON
 
   /* Map virtual aot to transport aot. */
   switch (hAacConfig->audioObjectType) {
-    case AOT_MP2_AAC_LC:
     case AOT_DABPLUS_AAC_LC:
+    case AOT_MP2_AAC_LC:
       transport_AOT = AOT_AAC_LC;
       break;
-    case AOT_MP2_SBR:
     case AOT_DABPLUS_SBR:
+    case AOT_MP2_SBR:
       transport_AOT = AOT_SBR;
       cc->flags |= CC_SBR;
      break;
-    case AOT_MP2_PS:
     case AOT_DABPLUS_PS:
+    case AOT_MP2_PS:
       transport_AOT = AOT_PS;
       cc->flags |= CC_SBR;
       break;
@@ -324,9 +324,27 @@ void FDKaacEnc_MapConfig(CODER_CONFIG *cc, USER_PARAM *extCfg, HANDLE_AACENC_CON
   cc->flags          |= CC_IS_BASELAYER;
   cc->channelMode     = hAacConfig->channelMode;
 
-  cc->nSubFrames = (hAacConfig->nSubFrames > 1 && extCfg->userTpNsubFrames == 1)
+  if(extCfg->userTpType == TT_DABPLUS && hAacConfig->nSubFrames==1) {
+	  switch(hAacConfig->sampleRate) {
+		  case 48000:
+			  cc->nSubFrames=6;
+			break;
+		  case 32000:
+			  cc->nSubFrames=4;
+			break;
+		  case 24000:
+			  cc->nSubFrames=3;
+			break;
+		  case 16000:
+			  cc->nSubFrames=2;
+			break;
+	  }
+	  fprintf(stderr, "hAacConfig->nSubFrames=%d hAacConfig->sampleRate=%d\n", hAacConfig->nSubFrames, hAacConfig->sampleRate);
+  } else {
+      cc->nSubFrames = (hAacConfig->nSubFrames > 1 && extCfg->userTpNsubFrames == 1)
                  ? hAacConfig->nSubFrames
                  : extCfg->userTpNsubFrames;
+  }
 
   cc->flags          |= (extCfg->userTpProtection) ? CC_PROTECTION : 0;
 
@@ -582,6 +600,7 @@ INT aacEncoder_LimitBitrate(
 
   FDK_ASSERT(bitRate > 0);
 
+  fprintf(stderr, "aacEncoder_LimitBitrate(): bitRate=%d", bitRate);
   return bitRate;
 }
 
@@ -643,11 +662,14 @@ AACENC_ERROR FDKaacEnc_AdjustEncSettings(HANDLE_AACENCODER hAacEncoder,
       case AOT_DABPLUS_PS:
     	  hAacConfig->syntaxFlags |= ((config->userSbrEnabled)    ? AC_SBR_PRESENT : 0);
       case AOT_DABPLUS_AAC_LC:
-          config->userTpType = (config->userTpType!=TT_UNKNOWN) ? config->userTpType : TT_MP4_RAW;
+          config->userTpType = (config->userTpType!=TT_UNKNOWN) ? config->userTpType : TT_DABPLUS;
           hAacConfig->framelength = (config->userFramelength!=(UINT)-1) ? config->userFramelength : 960;
           if (hAacConfig->framelength != 960) {
             return AACENC_INVALID_CONFIG;
           }
+          config->userTpSignaling=2;
+          if(config->userTpType == TT_DABPLUS)
+        	  hAacConfig->syntaxFlags |= AC_DAB;
           break;
       case AOT_ER_AAC_LC:
           hAacConfig->epConfig = 0;
@@ -690,6 +712,7 @@ AACENC_ERROR FDKaacEnc_AdjustEncSettings(HANDLE_AACENCODER hAacEncoder,
     }
 
     /* We need the frame length to call aacEncoder_LimitBitrate() */
+    fprintf(stderr, "config->userBitrate=%d\n", config->userBitrate);
     hAacConfig->bitRate = aacEncoder_LimitBitrate(
               NULL,
               hAacConfig->sampleRate,
@@ -701,6 +724,7 @@ AACENC_ERROR FDKaacEnc_AdjustEncSettings(HANDLE_AACENCODER hAacEncoder,
               isSbrActive(hAacConfig),
               hAacConfig->audioObjectType
               );
+    fprintf(stderr, "hAacConfig->bitRate=%d\n", hAacConfig->bitRate);
 
     switch ( hAacConfig->audioObjectType ) {
       case AOT_ER_AAC_LD:
@@ -789,6 +813,7 @@ AACENC_ERROR FDKaacEnc_AdjustEncSettings(HANDLE_AACENCODER hAacEncoder,
         hAacEncoder->metaDataAllowed = 0;
     }
 
+    fprintf(stderr, "hAacEncoder->metaDataAllowed=%d", hAacEncoder->metaDataAllowed);
     return err;
 }
 
@@ -1728,6 +1753,7 @@ AACENC_ERROR aacEncoder_SetParam(
                  || ((type==TT_MP4_LATM_MCP1) && ((flags&CAPF_LATM) && (flags&CAPF_RAWPACKETS)))
                  || ((type==TT_MP4_LOAS)      &&  (flags&CAPF_LOAS))
                  || ((type==TT_MP4_RAW)       &&  (flags&CAPF_RAWPACKETS))
+                 || ((type==TT_DABPLUS)       && ((flags&CAPF_DAB_AAC) && (flags&CAPF_RAWPACKETS)))
                 ) )
             {
                 err = AACENC_INVALID_CONFIG;
@@ -1765,7 +1791,7 @@ AACENC_ERROR aacEncoder_SetParam(
         break;
     case AACENC_TPSUBFRAMES:
         if (settings->userTpNsubFrames != value) {
-            if (! ( (value>=1) && (value<=4) ) ) {
+            if (! ( (value>=1) && (value<=6) ) ) {
                 err = AACENC_INVALID_CONFIG;
                 break;
             }

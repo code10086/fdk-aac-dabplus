@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+ï¿½ Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Fï¿½rderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -135,6 +135,7 @@ typedef enum
   TT_MP4_LOAS          = 10, /**< Audio Sync Stream.         */
 
   TT_DRM               = 12, /**< Digital Radio Mondial (DRM30/DRM+) bitstream format. */
+  TT_DABPLUS           = 13, /**< Digital Audio Broadcastong (DAB+) superframes bitstream format. */
 
   TT_MP1_L1            = 16, /**< MPEG 1 Audio Layer 1 audio bitstream. */
   TT_MP1_L2            = 17, /**< MPEG 1 Audio Layer 2 audio bitstream. */
